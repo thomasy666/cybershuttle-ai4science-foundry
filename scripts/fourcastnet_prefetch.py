@@ -104,9 +104,9 @@ def main():
     ds = ds.sortby("latitude", ascending=False)  # model expects 90N first
     print("ERA5 source:", ERA5_URL)
 
-    with h5py.File(out_path, "a") as f:
+    with h5py.File(out_path, "w") as f:  # recreate each run, so a file left by a killed run can't break this
         # Full-year shape, but only the forecast windows are written; the rest takes no disk space
-        fields = f.require_dataset("fields", shape=(n_steps_year, 20, 721, 1440), dtype="f4", chunks=(1, 1, 721, 1440))
+        fields = f.create_dataset("fields", shape=(n_steps_year, 20, 721, 1440), dtype="f4", chunks=(1, 1, 721, 1440))
         for t0 in init_times:
             times = [t0 + timedelta(hours=6 * k) for k in range(nsteps + 1)]
             i0 = int((t0 - datetime(year, 1, 1)).total_seconds() // 21600)
