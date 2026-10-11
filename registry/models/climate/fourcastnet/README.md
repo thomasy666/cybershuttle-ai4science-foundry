@@ -6,16 +6,18 @@ Model metadata: [`model.yaml`](model.yaml) · Recipe: [`recipes/fourcastnet-infe
 
 ## Setup
 
-Needs a PACE ICE account with GPU access and about 25 GB free in `~/scratch`. Run on the login node, from the repo root.
+Needs a PACE ICE account with GPU access and about 25 GB free in `~/scratch`. Run from the repo root. Setup runs on the login node; prefetch runs on a CPU compute node.
 
 ```bash
 git clone https://github.com/cyber-shuttle/cybershuttle-ai4science-foundry.git && cd cybershuttle-ai4science-foundry
 sacctmgr -nP show assoc user=$USER format=Account,QOS   # edit scripts/fourcastnet_config.env if not coc / coc-ice
 bash scripts/fourcastnet_setup_env.sh                   # ~10 min, ends with "AFNONet import ok"
 
+srun -A coc -p coc-cpu -q coc-ice -c 4 --mem=16G -t 00:30:00 --pty bash
 source scripts/fourcastnet_config.env && module load $MODULES
 source "$(conda info --base)/etc/profile.d/conda.sh" && conda activate $CONDA_ENV_PREFIX
 python scripts/fourcastnet_prefetch.py 2>&1 | tee $EVIDENCE_DIR/prefetch.log   # ~5 min, ends with "wrote .../2018.h5"
+exit
 ```
 
 Setup builds the env in `~/scratch/fourcastnet-work` and checks out NVlabs at commit `93360c1`. Prefetch downloads weights and ERA5, prints SHA-256 hashes, and checks each variable against the training mean (`t500` MISMATCH is expected, see below).
@@ -67,6 +69,8 @@ Paper (Pathak et al. 2022, Fig. 13; 36 start dates in 2018, 9 days apart): `z500
 **`ImportError: cannot import name 'cbuffer_sizes'`.** `numcodecs` 0.16 breaks `zarr` 2.18. Pinned `numcodecs==0.13.1`.
 
 **`t500` MISMATCH.** NVlabs stats for `t500` are 0.8× real values (202.9 K vs about 253 K), likely one zero-filled year among the 5 in `get_stats.py`. The model was trained with these stats, so real `t500` is used.
+
+**Prefetch prints nothing, or `OSError: bad object header version number`.** On the login node, prefetch was killed silently partway through, leaving a broken `2018.h5`. Run it on a compute node (as above); it recreates the file each run.
 
 **Huge errors, identical for both dates.** Prefetch was interrupted, so the ERA5 file is zeros. Rerun it until it prints `wrote .../2018.h5`.
 
