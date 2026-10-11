@@ -37,7 +37,7 @@ Success: `evidence/<jobid>/validation.txt` shows only `PASS`, and `sacct` shows 
 
 ## Verification
 
-`fourcastnet_validate.py` checks (all pass, [validation.txt](evidence/6136919/validation.txt)):
+`fourcastnet_validate.py` checks (all pass, [validation.txt](evidence/6185950/validation.txt)):
 
 1. **Smoke:** shape, finite values, plausible ranges for `z500`, `t850`, `t2m`, `u10`.
 2. **Error grows with lead time.**
@@ -52,11 +52,11 @@ Latitude-weighted RMSE vs ERA5, mean of 2018-01-01 and 2018-07-01:
 
 Paper (Pathak et al. 2022, Fig. 13; 36 start dates in 2018, 9 days apart): `z500` RMSE roughly 150–200 at 48 h and about 500 at 120 h; `t850` roughly 1.2–1.3 K at 48 h. Our values fall in the same range. Exact agreement isn't expected with 2 start dates instead of 36.
 
-![RMSE vs lead time](evidence/6136919/rmse_vs_lead.png)
+![RMSE vs lead time](evidence/6185950/rmse_vs_lead.png)
 
 ## Hardware and provenance
 
-- **Hardware:** NVIDIA A100-PCIE-40GB on `coc-gpu`. Peak RAM was 15.7 GB, and the 5-day forecast itself took 31 s (`evidence/sacct-*.txt`).
+- **Hardware:** NVIDIA A100-PCIE-40GB on `coc-gpu`. Peak RAM was about 15 GB, and the full 5-day job took 38 s (`evidence/sacct-*.txt`). A rerun from a fresh clone on a different node gave identical results.
 - **Code and weights:** NVlabs/FourCastNet at commit `93360c1`, unmodified; v0 weights from the NERSC portal. Commit, URLs and SHA-256 hashes are in [`model.yaml`](model.yaml).
 - **Data:** ERA5 via WeatherBench2's public copy (6-hourly, 0.25°). Per-variable checks are in `evidence/prefetch.log`.
 - **Software:** Python 3.11, PyTorch 2.4.1+cu121, numpy 1.26.4. Exact versions in `evidence/env/`.
