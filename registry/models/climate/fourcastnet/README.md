@@ -10,6 +10,7 @@ Needs a PACE ICE account with GPU access and about 25 GB free in `~/scratch`. Ru
 
 ```bash
 git clone https://github.com/cyber-shuttle/cybershuttle-ai4science-foundry.git && cd cybershuttle-ai4science-foundry
+# until PR #31 is merged: git clone -b add-fourcastnet-climate https://github.com/thomasy666/cybershuttle-ai4science-foundry.git
 sacctmgr -nP show assoc user=$USER format=Account,QOS   # edit scripts/fourcastnet_config.env if not coc / coc-ice
 bash scripts/fourcastnet_setup_env.sh                   # ~10 min, ends with "AFNONet import ok"
 
@@ -42,6 +43,8 @@ Success: `evidence/<jobid>/validation.txt` shows only `PASS`, and `sacct` shows 
 1. **Smoke:** shape, finite values, plausible ranges for `z500`, `t850`, `t2m`, `u10`.
 2. **Error grows with lead time.**
 3. **Beats persistence** (weather held at the start state) at every lead for `z500` and `t850`. A model with wrong weights or variable order fails this.
+
+These checks are meaningful because the truth (ERA5) is independent of the model, persistence is a model-free baseline, RMSE uses the paper's latitude weighting, and a fresh rerun on a different node reproduced every number exactly.
 
 Latitude-weighted RMSE vs ERA5, mean of 2018-01-01 and 2018-07-01:
 
